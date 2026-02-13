@@ -2,6 +2,12 @@
 
 Automated setup and management for a 7 Days to Die dedicated server on **Debian Linux** with automatic updates and systemd service management.
 
+**This setup is optimized for:**
+- Linux Debian 12+ (Proxmox CT or full VM/server)
+- Self-hosted servers behind a router with port forwarding
+- Remote player connections over public internet
+- Automated server updates and administration
+
 ## Quick Start
 
 ### Prerequisites
@@ -80,16 +86,23 @@ All server configuration is managed through shell variables in `7d2d-config.sh` 
    ```bash
    SERVER_NAME="Your Server Name"       # Server name in browser
    SERVER_DESCRIPTION="..."             # Server description
+   SERVER_REGION="Europe"               # Your region (for matchmaking)
    GAME_NAME="Your Server Name World"   # Save game name (NO COLONS!)
    SERVER_PASSWORD="secretpassword"     # Server password
-   SERVER_VISIBILITY="0"                # 0=private, 1=public
+   SERVER_PORT="26900"                  # Server port (must match port forwarding)
+   SERVER_VISIBILITY="0"                # 0=private, 1=public, 2=listed
    SERVER_MAX_PLAYERS="6"               # Max concurrent players
+   ALLOW_CROSSPLAY="false"              # Keep false for Linux servers
+   DISABLED_NETWORK_PROTOCOLS=""        # Blank = both protocols enabled
    GAME_DIFFICULTY="2"                  # 0=Easiest ... 5=Nightmare
    GAME_WORLD="Navezgane"               # Navezgane or RWG
    PLAYER_KILLING_MODE="3"              # PvP mode
    EAC_ENABLED="true"                   # Anti-cheat enabled
+   LOOT_RESPAWN_DAYS="3"                # Days before loot respawns
    ADMIN_STEAM_IDS="YOUR_STEAM_ID_HERE" # Your Steam ID (SteamID64 format)
    ```
+
+> **For remote connectivity:** Ensure `DISABLED_NETWORK_PROTOCOLS` is blank, `SERVER_REGION` matches your location, and `ALLOW_CROSSPLAY` is false (recommended for port-forwarded Linux servers).
 
 The local config contains private information and should **NOT** be pushed remotely - keeps passwords secure and allows different deployments.
 
@@ -129,6 +142,59 @@ ADMIN_STEAM_IDS="YOUR_STEAM_ID_HERE 76561198021925107 76561198045685453"
 ```
 
 The admin list is automatically applied to `~/.local/share/7DaysToDie/Saves/serveradmin.xml` when the update script runs.
+
+## Remote Connectivity
+
+### Port Forwarding Setup
+
+For remote players to connect from outside your network, configure port forwarding on your router:
+
+**Required Port Forwards** (TCP and UDP):
+```
+TCP 26900     → Server IP:26900
+UDP 26900-26903 → Server IP:26900-26903
+```
+
+> Note: Ports 26900-26903 are the defaults. Adjust if using different ports in `SERVER_PORT` setting.
+
+### Network Protocol Configuration
+
+This setup uses both **LiteNetLib** (primary) and **SteamNetworking** (fallback):
+
+```bash
+# In 7d2d-config.local.sh:
+DISABLED_NETWORK_PROTOCOLS=""    # Blank = both enabled (recommended)
+```
+
+**Why both protocols?**
+- **LiteNetLib**: Optimized game protocol for direct port-forwarded connections
+- **SteamNetworking**: Fallback option that routes through Steam's network infrastructure
+  - Useful if direct port forwarding has NAT issues
+  - Slightly higher latency but increases connection reliability
+
+### Server Visibility and Region
+
+Configure how your server appears in the server browser:
+
+```bash
+SERVER_VISIBILITY="0"    # 0=private (not listed), 1=friends only, 2=public
+SERVER_REGION="Europe"   # Set to your region: Europe, NorthAmericaEast, etc.
+```
+
+**Testing Remote Connectivity:**
+
+From outside your network, verify port forwarding works:
+```bash
+# Check if ports are reachable (from external machine)
+nmap -Pn -p 26900 your-public-ip-or-hostname.com  # TCP test
+```
+
+### Crossplay Configuration
+
+**For Linux-hosted servers:**
+- If Windows/Mac clients need to connect to your Linux server, **keep crossplay disabled** (`ALLOW_CROSSPLAY="false"`)
+- Crossplay compatibility mode has additional server constraints (e.g., `LootRespawnDays` must be -1, 0, or ≥5)
+- Standard single-platform mode works reliably with port forwarding
 
 **Finding Your Steam ID:**
 1. Visit [steamid.io](https://steamid.io) or [steamdb.info/calculator](https://steamdb.info/calculator)
@@ -190,6 +256,45 @@ Scripts automatically install missing dependencies:
 
 ## Troubleshooting
 
+### Remote players can't connect
+
+**Symptoms:**
+- Server appears in server browser but connection fails
+- "Could not retrieve Server ID" error when trying to connect
+- Local connections work fine
+
+**Solution:**
+1. Verify port forwarding is configured:
+   ```bash
+   # From external machine, test if ports are reachable
+   nmap -Pn -p 26900 your-public-ip.com
+   ```
+
+2. Ensure network protocols are enabled in `7d2d-config.local.sh`:
+   ```bash
+   DISABLED_NETWORK_PROTOCOLS=""     # Must be blank (both protocols enabled)
+   ```
+
+3. Verify region matches your location:
+   ```bash
+   SERVER_REGION="Europe"            # Or your actual region
+   ```
+
+4. Keep crossplay disabled for Linux-hosted servers:
+   ```bash
+   ALLOW_CROSSPLAY="false"           # Recommended for port-forwarded setup
+   ```
+
+5. Restart server to apply changes:
+   ```bash
+   7d2d_restart
+   ```
+
+**Why this works:**
+- **Both network protocols enabled**: LiteNetLib handles direct port-forwarded connections, SteamNetworking provides fallback routing through Steam infrastructure
+- **Correct region**: Ensures you're in the right matchmaking region for your location
+- **Crossplay disabled**: Simpler, more reliable configuration without additional server constraint validation
+
 ### Service won't start
 ```bash
 # Check service status
@@ -219,6 +324,8 @@ sudo ~/setup-service.sh
 - **Idempotent updates**: Scripts can be run multiple times without causing issues
 - **Config management**: Shell variables combined with xmlstarlet for dynamic serverconfig.xml updates
 - **Log rotation**: Old server logs (>30 days) automatically purged during updates
+- **Network configuration**: Both LiteNetLib and SteamNetworking protocols enabled by default to handle various port forwarding and NAT scenarios
+- **Crossplay disabled by default**: Provides simpler, more reliable operation for port-forwarded Linux servers without additional validation constraints
 
 ## Support
 

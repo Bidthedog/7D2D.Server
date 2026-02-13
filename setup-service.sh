@@ -69,6 +69,10 @@ Restart=on-failure
 #RestartSec=10
 TimeoutStartSec=10min
 
+# Increase file descriptor limits to prevent connection issues
+# 7D2D server may require many open file descriptors for player connections
+LimitNOFILE=10240
+
 # Run update script before starting server
 # This handles: system updates, steamcmd updates, and 7D2D server updates
 ExecStartPre=/root/update-server.sh

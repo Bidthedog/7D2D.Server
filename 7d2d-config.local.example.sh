@@ -25,6 +25,10 @@ SERVER_NAME="My Awesome 7D2D Server"
 # Server description visible in server list
 SERVER_DESCRIPTION="A friendly survival server for the community"
 
+# Server region: NorthAmericaEast, NorthAmericaWest, CentralAmerica, SouthAmerica,
+# Europe, Russia, Asia, MiddleEast, Africa, Oceania
+SERVER_REGION="Europe"
+
 # Game save name (IMPORTANT: NO COLONS (:) - Windows players won't connect if you use colons)
 GAME_NAME="MyServerWorld"
 
@@ -40,6 +44,20 @@ SERVER_PASSWORD="MySecurePassword"
 # Maximum number of players allowed on server
 # Note: More players = higher CPU/RAM usage. Start with 8 and adjust
 SERVER_MAX_PLAYERS="8"
+
+# Allow crossplay: true = Windows/Mac/Linux players together, false = Linux only
+# IMPORTANT: When crossplay=true, additional server constraints apply:
+#   - LootRespawnDays must be: -1, 0, or >= 5 (not 1-4)
+#   - Other gameplay settings have stricter validation
+# RECOMMENDED: Keep as FALSE for port-forwarded Linux servers (most reliable)
+ALLOW_CROSSPLAY="false"
+
+# Disabled network protocols: Leave BLANK for both LiteNetLib AND SteamNetworking
+# RECOMMENDED: Blank (both enabled) - LiteNetLib for direct connection,
+#              SteamNetworking as fallback if port forwarding has NAT issues
+# LiteNetLib = primary optimized protocol (requires working port forwarding)
+# SteamNetworking = fallback that routes through Steam (higher latency, more reliable)
+DISABLED_NETWORK_PROTOCOLS=""
 
 # Game difficulty (higher = harder)
 # 0=Easiest, 1=Easy, 2=Normal, 3=Hard, 4=Insane, 5=Nightmare
@@ -62,6 +80,7 @@ DAY_NIGHT_LENGTH="60"
 
 # Number of in-game days before loot respawns in containers
 # Lower = loot respawns faster
+# (-1 - 0, >= 5 if cross play enabled)
 LOOT_RESPAWN_DAYS="7"
 
 # Air drop frequency in in-game hours

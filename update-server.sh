@@ -372,6 +372,9 @@ apply_config_to_serverconfig() {
     log "  ServerDescription: ${SERVER_DESCRIPTION}"
     xmlstarlet ed -L -u '//property[@name="ServerDescription"]/@value' -v "${SERVER_DESCRIPTION}" "${config_file}"
 
+    log "  Region: ${SERVER_REGION}"
+    xmlstarlet ed -L -u '//property[@name="Region"]/@value' -v "${SERVER_REGION}" "${config_file}"
+
     log "  ServerPort: ${SERVER_PORT}"
     xmlstarlet ed -L -u '//property[@name="ServerPort"]/@value' -v "${SERVER_PORT}" "${config_file}"
 
@@ -415,6 +418,12 @@ apply_config_to_serverconfig() {
 
     log "  EACEnabled: ${EAC_ENABLED}"
     xmlstarlet ed -L -u '//property[@name="EACEnabled"]/@value' -v "${EAC_ENABLED}" "${config_file}"
+
+    log "  ServerAllowCrossplay: ${ALLOW_CROSSPLAY}"
+    xmlstarlet ed -L -u '//property[@name="ServerAllowCrossplay"]/@value' -v "${ALLOW_CROSSPLAY}" "${config_file}"
+
+    log "  ServerDisabledNetworkProtocols: ${DISABLED_NETWORK_PROTOCOLS}"
+    xmlstarlet ed -L -u '//property[@name="ServerDisabledNetworkProtocols"]/@value' -v "${DISABLED_NETWORK_PROTOCOLS}" "${config_file}"
 
     log "  TelnetEnabled: true"
     xmlstarlet ed -L -u '//property[@name="TelnetEnabled"]/@value' -v "true" "${config_file}"

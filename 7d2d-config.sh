@@ -26,10 +26,13 @@ SERVER_APP_ID="294420"
 # DO NOT commit sensitive settings to git - use the .local file instead
 SERVER_NAME="My 7D2D Server"
 SERVER_DESCRIPTION="A 7 Days to Die Survival Server"
+SERVER_REGION="Europe"
 SERVER_PORT="26900"
 SERVER_VISIBILITY="0"
 SERVER_PASSWORD="changeme"
 SERVER_MAX_PLAYERS="8"
+ALLOW_CROSSPLAY="true"
+DISABLED_NETWORK_PROTOCOLS="SteamNetworking"
 
 # === Game Configuration ===
 GAME_NAME="MyWorld"
